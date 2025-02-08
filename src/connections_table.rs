@@ -32,16 +32,16 @@ use style::palette::tailwind;
 use unicode_width::UnicodeWidthStr;
 use crate::netstat::{get_all_connections, Netstat};
 
-const PALETTES: [tailwind::Palette; 4] = [
-  tailwind::BLUE,
-  tailwind::EMERALD,
-  tailwind::INDIGO,
-  tailwind::RED,
-];
-const INFO_TEXT: [&str; 2] = [
-  "(Esc) quit | (↑) move up | (↓) move down | (←) move left | (→) move right",
-  "(Shift + →) next color | (Shift + ←) previous color",
-];
+// const PALETTES: [tailwind::Palette; 4] = [
+//   tailwind::BLUE,
+//   tailwind::EMERALD,
+//   tailwind::INDIGO,
+//   tailwind::RED,
+// ];
+// const INFO_TEXT: [&str; 2] = [
+//   "(Esc) quit | (↑) move up | (↓) move down | (←) move left | (→) move right",
+//   "(Shift + →) next color | (Shift + ←) previous color",
+// ];
 
 const ITEM_HEIGHT: usize = 1;
 
@@ -108,10 +108,10 @@ impl TableColors {
 pub struct ConnectionsTable {
   state: TableState,
   items: Vec<Netstat>,
-  longest_item_lens: (u16, u16, u16, u16, u16, u16, u16), // order is (name, address, email)
+  // longest_item_lens: (u16, u16, u16, u16, u16, u16, u16), // order is (name, address, email)
   scroll_state: ScrollbarState,
-  colors: TableColors,
-  color_index: usize,
+  // colors: TableColors,
+  // color_index: usize,
 }
 
 impl ConnectionsTable {
@@ -119,10 +119,10 @@ impl ConnectionsTable {
     let data_vec = get_all_connections(); // generate_fake_names();
     Self {
       state: TableState::default().with_selected(0),
-      longest_item_lens: (10, 20, 10, 20, 10, 10, 10) , //constraint_len_calculator(&data_vec),
+      // longest_item_lens: (10, 20, 10, 20, 10, 10, 10) , //constraint_len_calculator(&data_vec),
       scroll_state: ScrollbarState::new((data_vec.len() - 1) * ITEM_HEIGHT),
-      colors: TableColors::new(&PALETTES[0]),
-      color_index: 0,
+      // colors: TableColors::new(&PALETTES[0]),
+      // color_index: 0,
       items: data_vec,
     }
   }
@@ -156,26 +156,26 @@ impl ConnectionsTable {
     self.scroll_state = self.scroll_state.position(i * ITEM_HEIGHT);
   }
 
-  pub fn next_column(&mut self) {
-    self.state.select_next_column();
-  }
-
-  pub fn previous_column(&mut self) {
-    self.state.select_previous_column();
-  }
-
-  pub fn next_color(&mut self) {
-    self.color_index = (self.color_index + 1) % PALETTES.len();
-  }
-
-  pub fn previous_color(&mut self) {
-    let count = PALETTES.len();
-    self.color_index = (self.color_index + count - 1) % count;
-  }
-
-  pub fn set_colors(&mut self) {
-    self.colors = TableColors::new(&PALETTES[self.color_index]);
-  }
+  // pub fn next_column(&mut self) {
+  //   self.state.select_next_column();
+  // }
+  //
+  // pub fn previous_column(&mut self) {
+  //   self.state.select_previous_column();
+  // }
+  //
+  // pub fn next_color(&mut self) {
+  //   self.color_index = (self.color_index + 1) % PALETTES.len();
+  // }
+  //
+  // pub fn previous_color(&mut self) {
+  //   let count = PALETTES.len();
+  //   self.color_index = (self.color_index + count - 1) % count;
+  // }
+  //
+  // pub fn set_colors(&mut self) {
+  //   self.colors = TableColors::new(&PALETTES[self.color_index]);
+  // }
 
   pub fn run(mut self, frame: &mut Frame, rect: Rect) {
     // loop {
@@ -208,25 +208,25 @@ impl ConnectionsTable {
     // let vertical = &Layout::vertical([Constraint::Min(5), Constraint::Length(4)]);
     // let rects = vertical.split(frame.area());
 
-    self.set_colors();
+    // self.set_colors();
 
     self.render_table(frame, rect);
-    self.render_scrollbar(frame, rect);
+    // self.render_scrollbar(frame, rect);
     // self.render_footer(frame, rects[1]);
   }
 
   fn render_table(&mut self, frame: &mut Frame, area: Rect) {
     let header_style = Style::default()
       .bold()
-      .fg(self.colors.header_fg)
-      .bg(self.colors.header_bg);
+      .fg(Color::Black)
+      .bg(Color::Blue);
     let selected_row_style = Style::default();
       // .add_modifier(Modifier::REVERSED)
       // .fg(self.colors.selected_row_style_fg);
-    let selected_col_style = Style::default().fg(self.colors.selected_column_style_fg);
-    let selected_cell_style = Style::default()
-      .add_modifier(Modifier::REVERSED)
-      .fg(self.colors.selected_cell_style_fg);
+    let selected_col_style = Style::default().fg(Color::Black);
+    // let selected_cell_style = Style::default()
+    //   .add_modifier(Modifier::REVERSED)
+    //   .fg(self.colors.selected_cell_style_fg);
 
     let header = ["Protocol", "Local Ip", "Local Port", "Remote Ip", "Remote Port", "State", "PIDs"]
       .into_iter()
@@ -277,19 +277,17 @@ impl ConnectionsTable {
       .header(header)
       .row_highlight_style(selected_row_style)
       .column_highlight_style(selected_col_style)
-      .cell_highlight_style(selected_cell_style)
+      // .cell_highlight_style(selected_cell_style)
       .highlight_symbol(Text::from(vec![
         "".into(),
         bar.into(),
         bar.into(),
         "".into(),
       ]))
-      .bg(self.colors.buffer_bg)
+      .bg(Color::White)
       .highlight_spacing(HighlightSpacing::Always);
     frame.render_stateful_widget(t, area, &mut self.state);
-  }
 
-  fn render_scrollbar(&mut self, frame: &mut Frame, area: Rect) {
     frame.render_stateful_widget(
       Scrollbar::default()
         .orientation(ScrollbarOrientation::VerticalRight)
@@ -303,21 +301,35 @@ impl ConnectionsTable {
     );
   }
 
-  fn render_footer(&self, frame: &mut Frame, area: Rect) {
-    let info_footer = Paragraph::new(Text::from_iter(INFO_TEXT))
-      .style(
-        Style::new()
-          .fg(self.colors.row_fg)
-          .bg(self.colors.buffer_bg),
-      )
-      .centered()
-      .block(
-        Block::bordered()
-          .border_type(BorderType::Double)
-          .border_style(Style::new().fg(self.colors.footer_border_color)),
-      );
-    frame.render_widget(info_footer, area);
-  }
+  // fn render_scrollbar(&mut self, frame: &mut Frame, area: Rect) {
+  //   frame.render_stateful_widget(
+  //     Scrollbar::default()
+  //       .orientation(ScrollbarOrientation::VerticalRight)
+  //       .begin_symbol(None)
+  //       .end_symbol(None),
+  //     area.inner(Margin {
+  //       vertical: 1,
+  //       horizontal: 1,
+  //     }),
+  //     &mut self.scroll_state,
+  //   );
+  // }
+
+  // fn render_footer(&self, frame: &mut Frame, area: Rect) {
+  //   let info_footer = Paragraph::new(Text::from_iter(INFO_TEXT))
+  //     .style(
+  //       Style::new()
+  //         .fg(self.colors.row_fg)
+  //         .bg(self.colors.buffer_bg),
+  //     )
+  //     .centered()
+  //     .block(
+  //       Block::bordered()
+  //         .border_type(BorderType::Double)
+  //         .border_style(Style::new().fg(self.colors.footer_border_color)),
+  //     );
+  //   frame.render_widget(info_footer, area);
+  // }
 
   fn get_style_by_state(&self, state: String) -> Style {
     if (state == "ESTABLISHED") {
